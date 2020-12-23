@@ -12,10 +12,9 @@ usersRouter.post('/', async (request, response) => {
   try {
     const { name, email, password } = request.body;
     const createUser = new CreateUserService();
-    const user = await createUser.execute({ name, email, password });
-    delete user.password;
+    const { id, created_at, updated_at, avatar } = await createUser.execute({ name, email, password });
 
-    return response.status(201).json(user);
+    return response.status(201).json({ id, name, email, created_at, updated_at, avatar });
   } catch (error) {
     return response.status(400).json({ error: error.message });
   }
@@ -27,14 +26,10 @@ usersRouter.patch(
   upload.single('avatar'),
   async (request, response) => {
     try {
-      const updateUserAvatar = new UpdateUserAvatarService();
-      const user = await updateUserAvatar.execute({
-        user_id: request.user.id,
-        avatarFileName: request.file.filename,
-      });
-      delete user.password;
-
-      return response.json(user);
+      const updateUserAvatarInstance = new UpdateUserAvatarService();
+      const { id, name, avatar, created_at, updated_at } = await updateUserAvatarInstance.execute({ user_id: request.user.id, avatarFileName: request.file.filename });
+      
+      return response.json({ id, name, avatar, created_at, updated_at });
     } catch (error) {
       return response.status(400).json({ error: error.message });
     }
